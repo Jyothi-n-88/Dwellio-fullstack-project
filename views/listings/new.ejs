@@ -13,7 +13,14 @@
           placeholder="Add a catchy title" 
           type="text" 
           class="form-control" 
+          required
         />
+        <div class="invalid-feedback">
+    Title is required.
+  </div>
+  <div class="valid-feedback">
+      Looks good!
+    </div>
       </div>
 
       <div class="mb-3">
@@ -22,7 +29,11 @@
           name="listing[description]"
           class="form-control"
           placeholder="enter description"
+          required
         ></textarea>
+        <div class="invalid-feedback">
+  Description is required.
+</div>
       </div>
 
       <div class="mb-3">
@@ -41,9 +52,13 @@
           <input 
             name="listing[price]" 
             placeholder="1200" 
-            type="number" 
             class="form-control"
+             required
+             min="1"
           />
+          <div class="invalid-feedback">
+  Price must be greater than 0.
+</div>
         </div>
 
         <div class="mb-3 col-md-8">
@@ -53,7 +68,11 @@
             placeholder="India" 
             type="text" 
             class="form-control"
+            required
           />
+          <div class="invalid-feedback">
+  Country is required.
+</div>
         </div>
       </div>
 
@@ -64,7 +83,12 @@
           placeholder="Jaipur, Rajasthan"
           type="text"
           class="form-control"
+          required
         />
+        <div class="invalid-feedback">
+  Location is required.
+</div>
+
       </div>
 
       <button class="btn btn-dark add-btn">Add</button>

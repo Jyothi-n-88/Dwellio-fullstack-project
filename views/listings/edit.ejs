@@ -15,6 +15,9 @@
           class="form-control" 
           required
         />
+         <div class="invalid-feedback">
+    Title is required.
+  </div>
       </div>
 
       <div class="mb-3">
@@ -24,6 +27,9 @@
           class="form-control"
           required
         ><%= listing.description %></textarea>
+         <div class="invalid-feedback">
+  Description is required.
+</div>
       </div>
 
       <div class="mb-3">
@@ -35,6 +41,9 @@
           class="form-control"
           required
         />
+         <div class="invalid-feedback">
+  Image Link is required.
+</div>
       </div>
 
       <div class="row">
@@ -47,6 +56,9 @@
             class="form-control"
             required
           />
+           <div class="invalid-feedback">
+  Price must be greater than 0.
+</div>
         </div>
 
         <div class="mb-3 col-md-8">
@@ -58,6 +70,9 @@
             class="form-control"
             required
           />
+          <div class="invalid-feedback">
+  Country is required.
+</div>
         </div>
       </div>
 
@@ -70,6 +85,9 @@
           class="form-control"
           required
         />
+        <div class="invalid-feedback">
+  Location is required.
+</div>
       </div>
 
       <button class="btn btn-dark edit-btn">Edit</button>
