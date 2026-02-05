@@ -17,7 +17,7 @@ const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT || 8080;
 const wrapAsync=require("./utils/wrapAsync.js");
 const ExpressError=require("./utils/expressError.js");
-
+const { listingSchema } = require("./schema.js");
 async function main() {
   await mongoose.connect(MONGO_URL);
 }
@@ -47,6 +47,15 @@ app.get("/", (req, res) => {
 //   console.log(sampleListing);
 //   res.send("Successful Test");
 // });
+const validateListing = (req, res, next) => {
+  const { error } = listingSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map(el => el.message).join(", ");
+    throw new ExpressError(400, msg);
+  }
+  next();
+};
+
 app.get("/listings",wrapAsync( async (req, res) => {
   const allListings = await Listing.find({});
   res.render("listings/index.ejs", { allListings });
@@ -65,15 +74,15 @@ app.get("/listings/:id", wrapAsync(async (req, res) => {
 }));
 
 //Create Route
-app.post("/listings", wrapAsync(async (req, res) => {
-  if(!req.body.listing)
-  {
-    throw new ExpressError(400,"Send Valid Data for Listing");
-  };
-  const newListing = new Listing(req.body.listing);
-  await newListing.save();
-  res.redirect("/listings");
-}));
+app.post(
+  "/listings",validateListing,
+  wrapAsync(async (req, res) => {
+    const newListing = new Listing(req.body.listing);
+    await newListing.save();
+    res.redirect("/listings");
+  })
+);
+
 
 //Edit Route
 app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
@@ -83,11 +92,7 @@ app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
 }));
 
 //Update Route
-app.put("/listings/:id", wrapAsync(async (req, res) => {
-  if(!req.body.listing)
-  {
-    throw new ExpressError(400,"Send Valid Data for Listing");
-  };
+app.put("/listings/:id", validateListing,wrapAsync(async (req, res) => {
   let { id } = req.params;
   await Listing.findByIdAndUpdate(id, { ...req.body.listing });
   res.redirect(`/listings/${id}`);
@@ -101,13 +106,6 @@ app.delete("/listings/:id",wrapAsync( async (req, res) => {
   res.redirect("/listings");
 }));
 
-// app.all("*",(req,res,next)=>{
-// next(new ExpressError(404,"Page Not Found!"))});
-
-// app.use((err, req, res, next) => {
-//   let { statusCode, message } = err;
-//   res.status(statusCode).send(message);
-// });
 app.use( (req, res, next) => {
   next(new ExpressError(404, "Page Not Found!"));
 });
@@ -115,8 +113,8 @@ app.use( (req, res, next) => {
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Something went wrong!";
-  res.render("error.ejs",{message});
-  // res.status(statusCode).send(message);
+  res.status(statusCode).render("error.ejs", { message });
+
 });
 
 app.listen(PORT, () => {
