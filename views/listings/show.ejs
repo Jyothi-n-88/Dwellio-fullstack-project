@@ -40,3 +40,69 @@
 
   </div>
 </div>
+<!-- Reviews Section -->
+<div class="container mt-5" style="max-width: 700px;">
+  <h4 class="mb-3">Reviews</h4>
+
+  <% if (listing.reviews.length === 0) { %>
+    <p class="text-muted">No reviews yet. Be the first to review!</p>
+  <% } else { %>
+    <% listing.reviews.forEach(review => { %>
+      <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-bold mb-1">
+            Rating: ⭐ <%= review.rating %> / 5
+          </h6>
+          <p class="mb-1"><%= review.comment %></p>
+          <small class="text-muted">
+            <%= review.createdAt.toDateString() %>
+          </small>
+        </div>
+      </div>
+    <% }) %>
+  <% } %>
+</div>
+
+<hr>
+<!-- Add Review -->
+<div class="container mt-4 mb-5" style="max-width: 700px;">
+  <h5 class="mb-3">Leave a Review</h5>
+
+  <form action="/listings/<%= listing._id %>/reviews" method="POST" class="needs-validation" novalidate>
+
+    <!-- Rating Slider -->
+    <div class="mb-3">
+      <label class="form-label">
+        Rating: <span id="ratingValue">3</span> ⭐
+      </label>
+      <input 
+        type="range" 
+        name="review[rating]"
+        class="form-range"
+        min="0"
+        max="5"
+        step="1"
+        value="3"
+        oninput="ratingValue.innerText = this.value"
+        required
+      >
+    </div>
+
+    <!-- Comment -->
+    <div class="mb-3">
+      <label class="form-label">Comment</label>
+      <textarea
+        name="review[comment]"
+        class="form-control"
+        rows="3"
+        required
+      ></textarea>
+      <div class="invalid-feedback">
+        Please write a review.
+      </div>
+    </div>
+
+    <button class="btn btn-success">Submit Review</button>
+  </form>
+</div>
+

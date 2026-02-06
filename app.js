@@ -17,7 +17,8 @@ const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT || 8080;
 const wrapAsync=require("./utils/wrapAsync.js");
 const ExpressError=require("./utils/expressError.js");
-const { listingSchema } = require("./schema.js");
+const { listingSchema,reviewSchema  } = require("./schema.js");
+const Review=require("./models/reviews.js");
 async function main() {
   await mongoose.connect(MONGO_URL);
 }
@@ -56,6 +57,15 @@ const validateListing = (req, res, next) => {
   next();
 };
 
+const validateReview = (req, res, next) => {
+  const { error } = reviewSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map(el => el.message).join(",");
+    throw new ExpressError(400, msg);
+  }
+  next();
+};
+
 app.get("/listings",wrapAsync( async (req, res) => {
   const allListings = await Listing.find({});
   res.render("listings/index.ejs", { allListings });
@@ -68,8 +78,13 @@ app.get("/listings/new", wrapAsync(async(req, res) => {
 
 //Show Route
 app.get("/listings/:id", wrapAsync(async (req, res) => {
-  let { id } = req.params;
-  const listing = await Listing.findById(id);
+  const { id } = req.params;
+  const listing = await Listing.findById(id).populate("reviews");
+
+  if (!listing) {
+    throw new ExpressError(404, "Listing not found");
+  }
+
   res.render("listings/show.ejs", { listing });
 }));
 
@@ -105,6 +120,22 @@ app.delete("/listings/:id",wrapAsync( async (req, res) => {
   console.log(deletedListing);
   res.redirect("/listings");
 }));
+
+app.post(
+  "/listings/:id/reviews",
+  validateReview,
+  wrapAsync(async (req, res) => {
+    const listing = await Listing.findById(req.params.id);
+    const review = new Review(req.body.review);
+
+    listing.reviews.push(review);
+
+    await review.save();
+    await listing.save();
+
+    res.redirect(`/listings/${listing._id}`);
+  })
+);
 
 app.use( (req, res, next) => {
   next(new ExpressError(404, "Page Not Found!"));
