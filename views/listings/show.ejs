@@ -1,38 +1,37 @@
 <% layout("/layouts/boilerplate") %>
 
-<div class="container d-flex justify-content-center mt-5">
-  <div class="card shadow-lg p-4 text-center" style="max-width: 700px; width: 100%;">
+<div class="container d-flex justify-content-center mt-4">
+  <div class="card shadow p-4 text-center" style="max-width: 700px; width: 100%;">
 
     <!-- Listing Image -->
     <img 
       src="<%= listing.image?.url || 'https://q-xx.bstatic.com/xdata/images/hotel/max500/672628389.jpg' %>"
       alt="Listing Image"
       class="img-fluid rounded mb-4"
-      style="height: 350px; object-fit: cover;"
+      style="height: 300px; object-fit: cover;"
     />
 
     <!-- Listing Info -->
-    <h3 class="mb-2"><%= listing.title %></h3>
-    <p class="text-muted"><%= listing.description %></p>
+    <h4 class="mb-2"><%= listing.title %></h4>
+    <p class="text-muted mb-2"><%= listing.description %></p>
 
-    <h5 class="fw-bold">
-      &#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %>
- / night
-    </h5>
+    <h6 class="fw-bold">
+      &#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %> / night
+    </h6>
 
-    <p class="mt-2">
+    <p class="mt-2 text-secondary">
       <i class="fa-solid fa-location-dot"></i>
       <%= listing.location %>, <%= listing.country %>
     </p>
 
     <!-- Buttons -->
-    <div class="d-flex justify-content-center gap-3 mt-4">
-      <a href="/listings/<%= listing._id %>/edit" class="btn btn-primary">
+    <div class="d-flex justify-content-center gap-3 mt-3">
+      <a href="/listings/<%= listing._id %>/edit" class="btn btn-sm btn-primary">
         Edit
       </a>
 
       <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
-        <button class="btn btn-danger">
+        <button class="btn btn-sm btn-danger">
           Delete
         </button>
       </form>
@@ -40,27 +39,47 @@
 
   </div>
 </div>
-<!-- Reviews Section -->
-<div class="container mt-5" style="max-width: 700px;">
-  <h4 class="mb-3">Reviews</h4>
 
-  <% if (listing.reviews.length === 0) { %>
-    <p class="text-muted">No reviews yet. Be the first to review!</p>
-  <% } else { %>
-    <% listing.reviews.forEach(review => { %>
-      <div class="card mb-3 shadow-sm">
-        <div class="card-body">
-          <h6 class="fw-bold mb-1">
-            Rating: ⭐ <%= review.rating %> / 5
-          </h6>
-          <p class="mb-1"><%= review.comment %></p>
-          <small class="text-muted">
-            <%= review.createdAt.toDateString() %>
-          </small>
+<!-- Reviews Section -->
+<div class="container mt-5" style="max-width: 900px;">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+
+      <!-- Heading -->
+      <h4 class="mb-3">Reviews</h4>
+
+      <% if (listing.reviews.length === 0) { %>
+        <p class="text-muted">No reviews yet. Be the first to review!</p>
+      <% } else { %>
+
+        <!-- Review Cards -->
+        <div class="row">
+          <% listing.reviews.forEach(review => { %>
+            <div class="col-md-6 mb-4">
+              <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                  <h6 class="fw-bold mb-1">
+                    Rating: ⭐ <%= review.rating %> / 5
+                  </h6>
+                  <p class="mb-1"><%= review.comment %></p>
+                  <small class="text-muted">
+                    <%= review.createdAt.toDateString() %>
+                  </small>
+                  <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+                    <button class="btn btn-sm btn-outline-danger">
+                        Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          <% }) %>
         </div>
-      </div>
-    <% }) %>
-  <% } %>
+
+      <% } %>
+
+    </div>
+  </div>
 </div>
 
 <hr>
