@@ -17,6 +17,8 @@ const PORT = process.env.PORT || 8080;
 const ExpressError=require("./utils/expressError.js");
 const listingrouter=require("./routes/listings.js")
 const reviewrouter=require("./routes/reviews.js")
+const session = require('express-session');
+const flash = require('connect-flash');
 
 async function main() {
   await mongoose.connect(MONGO_URL);
@@ -33,7 +35,24 @@ main()
 app.get("/", (req, res) => {
   res.send("Server is running 🚀");
 });
+const sessionOptions={
+  secret: 'dwellio@123',
+  resave: false,
+  saveUninitialized: true,
+ cookie:{
+  expires:Date.now()+7*24*60*60*1000,
+  maxAge:7*24*60*60*1000,
+  httpOnly:true
+ }};
 
+app.use(session(sessionOptions));
+app.use(flash());
+app.use((req,res,next)=>
+{
+  res.locals.success=req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+})
 app.use("/listings",listingrouter);
 app.use("/listings/:id/reviews",reviewrouter);
 
