@@ -1,15 +1,48 @@
-<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/"><i class="fa-solid fa-compass"></i></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+<nav class="navbar navbar-expand-md bg-white border-bottom sticky-top shadow-sm">
+  <div class="container-fluid px-4">
+
+    <!-- Logo -->
+    <a class="navbar-brand brand-logo d-flex align-items-center" href="/">
+  <i class="fa-solid fa-compass me-2"></i>
+  <span>Dwellio</span>
+</a>
+
+    <!-- Toggle Button -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+      data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
+      aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+
+      <!-- Left Side Links -->
       <div class="navbar-nav">
-        <a class="nav-link" aria-current="page" href="/">Home</a>
-        <a class="nav-link" href="/listings">All Listings</a>
-        <a class="nav-link" href="/listings/new">Add New List</a>
+        <a class="nav-link fw-semibold" href="/">Home</a>
+        <a class="nav-link fw-semibold" href="/listings">All Listings</a>
+        <a class="nav-link fw-semibold" href="/listings/new">Add New List</a>
       </div>
+
+      <!-- RIGHT SIDE (Airbnb Style) -->
+      <div class="navbar-nav ms-auto align-items-center">
+
+        <% if(!currentUser) { %>
+
+          <a class="nav-link fw-semibold" href="/signup">Sign Up</a>
+          <a class="nav-link fw-semibold" href="/login">Login</a>
+
+        <% } else { %>
+
+          <span class="nav-link fw-semibold text-muted">
+            Hello, <%= currentUser.username %>
+          </span>
+
+          <a class="nav-link fw-semibold text-danger" href="/logout">Logout</a>
+
+        <% } %>
+
+      </div>
+
     </div>
   </div>
 </nav>

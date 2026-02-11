@@ -8,7 +8,8 @@ body{
     flex: 1;
 }
 .navbar{
-    height: 5rem;
+    min-height: 5rem;
+    padding: 0 2rem;
     background-color: white;
 }
 .fa-compass{
@@ -132,4 +133,69 @@ body{
 .listing-link {
     text-decoration: none;
     color: inherit; /* Inherit color to avoid blue links */
+}
+/* ================= AUTH BUTTONS (Navbar Right Side) ================= */
+
+.auth-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Airbnb-style soft rounded buttons */
+.auth-section .btn {
+    border-radius: 25px;
+    padding: 6px 18px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+/* Sign Up button style */
+.btn-signup {
+    background-color: #570470;
+    color: white;
+    border: none;
+}
+
+.btn-signup:hover {
+    background-color: #3d0252;
+    color: white;
+}
+
+/* Login button style */
+.btn-login {
+    border: 1px solid #570470;
+    color: #570470;
+    background: transparent;
+}
+
+.btn-login:hover {
+    background-color: #570470;
+    color: white;
+}
+
+/* Logout button */
+.btn-logout {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+.btn-logout:hover {
+    background-color: #bb2d3b;
+}
+
+.brand-logo {
+    font-size: 1.8rem !important;
+    font-weight: 800;
+    color: #570470 !important;
+    display: flex;
+    align-items: center;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.brand-logo:hover {
+    color: #3d0252 !important;
+    transform: scale(1.03);
 }
