@@ -10,7 +10,9 @@
       class="img-fluid rounded mb-4"
       style="height: 300px; object-fit: cover;"
     />
-
+    <p class="text-muted">
+      Owned by <%= listing.owner.username %>
+    </p>
     <!-- Listing Info -->
     <h4 class="mb-2"><%= listing.title %></h4>
     <p class="text-muted mb-2"><%= listing.description %></p>
@@ -26,18 +28,16 @@
 
     <!-- Buttons -->
     <div class="d-flex justify-content-center gap-3 mt-3">
-      <a href="/listings/<%= listing._id %>/edit" class="btn btn-sm btn-primary">
-        Edit
-      </a>
-
-      <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
-        <button class="btn btn-sm btn-danger">
-          Delete
-        </button>
-      </form>
-    </div>
-
-  </div>
+      <% if(currentUser && listing.owner.equals(currentUser._id)) { %>
+          <a href="/listings/<%= listing._id %>/edit" class="btn btn-warning">
+             Edit
+           </a>
+          <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+            <button class="btn btn-danger">Delete</button>
+          </form>
+      <% } %>
+   </div>
+</div>
 </div>
 
 <!-- Reviews Section -->
@@ -65,11 +65,11 @@
                   <small class="text-muted">
                     <%= review.createdAt.toDateString() %>
                   </small>
-                  <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
-                    <button class="btn btn-sm btn-outline-danger">
-                        Delete
-                    </button>
-                  </form>
+                  <% if(currentUser && review.author.equals(currentUser._id)) { %>
+                   <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+                      <button class="btn btn-sm btn-danger">Delete</button>
+                   </form>
+                  <% } %>
                 </div>
               </div>
             </div>
