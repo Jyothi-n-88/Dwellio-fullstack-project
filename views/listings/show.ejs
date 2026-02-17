@@ -50,29 +50,49 @@
 
       <% if (listing.reviews.length === 0) { %>
         <p class="text-muted">No reviews yet. Be the first to review!</p>
-      <% } else { %>
-
-        <!-- Review Cards -->
+      <% } 
+      else { %>
         <div class="row">
           <% listing.reviews.forEach(review => { %>
-            <div class="col-md-6 mb-4">
-              <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                  <h6 class="fw-bold mb-1">
-                    Rating: ⭐ <%= review.rating %> / 5
-                  </h6>
-                  <p class="mb-1"><%= review.comment %></p>
-                  <small class="text-muted">
-                    <%= review.createdAt.toDateString() %>
-                  </small>
-                  <% if(currentUser && review.author.equals(currentUser._id)) { %>
-                   <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
-                      <button class="btn btn-sm btn-danger">Delete</button>
-                   </form>
-                  <% } %>
-                </div>
-              </div>
-            </div>
+           <div class="col-md-6 col-lg-4 mb-4">
+  <div class="card shadow-sm h-100 border">
+    <div class="card-body">
+
+      <!-- Username -->
+      <h6 class="mb-2">
+        @<%= review.author.username %>
+      </h6>
+
+      <!-- Stars -->
+      <div class="starability-result mb-2"
+           data-rating="<%= review.rating %>">
+        Rated: <%= review.rating %> stars
+      </div>
+
+      <!-- Comment -->
+      <p class="mb-2">
+        "<%= review.comment %>"
+      </p>
+
+      <!-- Date -->
+      <small class="text-muted d-block mb-2">
+        <%= review.createdAt.toDateString() %>
+      </small>
+
+      <% if(currentUser && review.author.equals(currentUser._id)) { %>
+        <form method="POST"
+          action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
+          <button class="btn btn-sm btn-outline-danger">
+            Delete
+          </button>
+        </form>
+      <% } %>
+
+    </div>
+  </div>
+</div>
+
+
           <% }) %>
         </div>
 
@@ -85,26 +105,26 @@
 <hr>
 <!-- Add Review -->
 <div class="container mt-4 mb-5" style="max-width: 700px;">
-  <h5 class="mb-3">Leave a Review</h5>
+  <h4 class="mb-3">Leave a Review</h4>
 
   <form action="/listings/<%= listing._id %>/reviews" method="POST" class="needs-validation" novalidate>
 
     <!-- Rating Slider -->
-    <div class="mb-3">
-      <label class="form-label">
-        Rating: <span id="ratingValue">3</span> ⭐
-      </label>
-      <input 
-        type="range" 
-        name="review[rating]"
-        class="form-range"
-        min="0"
-        max="5"
-        step="1"
-        value="3"
-        oninput="ratingValue.innerText = this.value"
-        required
-      >
+    <div class="mb-2">
+      <h5>Ratings</h5>
+      <fieldset class="starability-slot">
+  <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
+  <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+  <label for="first-rate1" title="Terrible">1 star</label>
+  <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+  <label for="first-rate2" title="Not good">2 stars</label>
+  <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+  <label for="first-rate3" title="Average">3 stars</label>
+  <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+  <label for="first-rate4" title="Very good">4 stars</label>
+  <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+  <label for="first-rate5" title="Amazing">5 stars</label>
+</fieldset>
     </div>
 
     <!-- Comment -->
