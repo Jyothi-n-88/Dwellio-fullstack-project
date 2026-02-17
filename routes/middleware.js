@@ -4,18 +4,30 @@ const { listingSchema, reviewSchema } = require("../schema.js");
 const ExpressError=require("../utils/expressError.js");
 module.exports.isLoggedIn = (req, res, next) => {
     if (!req.isAuthenticated()) {
-        req.session.returnTo = req.originalUrl;
+
+        // If it's a GET request → store original URL
+        if (req.method === "GET") {
+            req.session.returnTo = req.originalUrl;
+        } 
+        // If it's POST/DELETE → store referer page
+        else {
+            req.session.returnTo = req.headers.referer;
+        }
+
         req.flash("error", "You must be logged in to do that!");
         return res.redirect("/login");
     }
     next();
 };
+
 module.exports.saveRedirectUrl = (req, res, next) => {
     if (req.session.returnTo) {
         res.locals.redirectUrl = req.session.returnTo;
+        delete req.session.returnTo;   
     }
     next();
 };
+
 module.exports.isOwner = async (req, res, next) => {
     const { id } = req.params;
     const listing = await Listing.findById(id);

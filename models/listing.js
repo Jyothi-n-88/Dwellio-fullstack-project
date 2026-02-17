@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Review = require("./reviews");   // ✅ FIXED
+const Review = require("./reviews");  
 const Schema = mongoose.Schema;
 
 const listingSchema = new Schema({
@@ -39,7 +39,7 @@ const listingSchema = new Schema({
 });
 
 
-// ✅ CASCADE DELETE (VERY IMPORTANT)
+// ✅ CASCADE DELETE 
 listingSchema.post("findOneAndDelete", async function (listing) {
   if (listing) {
     await Review.deleteMany({
