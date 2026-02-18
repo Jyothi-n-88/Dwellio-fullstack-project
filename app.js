@@ -24,7 +24,9 @@ const LocalStrategy = require("passport-local");
 const User = require("./models/user");
 const signuprouter = require("./routes/signup");
 const loginrouter = require("./routes/login");
-
+const multer = require("multer");
+const { storage } = require("./cloudConfig");
+const upload = multer({ storage });
 
 async function main() {
   await mongoose.connect(MONGO_URL);

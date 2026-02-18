@@ -1,9 +1,10 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const initData = require("./data.js");
 const Listing = require("../models/listing.js");
 const User = require("../models/user.js");
-
-const MONGO_URL = "mongodb://127.0.0.1:27017/appdbs";
+const { cloudinary } = require("../cloudConfig"); 
+const MONGO_URL = process.env.MONGO_URL;
 
 main()
   .then(() => {
@@ -19,14 +20,32 @@ async function main() {
 
 const initDB = async () => {
   await Listing.deleteMany({});
-  const user = await User.findOne({ username: "jyothi" });
-   const listingsWithOwner = initData.data.map((obj) => ({
-    ...obj,
-    owner: '698b14e382a9bfd2db9bc24d'
-  }));
 
-  await Listing.insertMany(listingsWithOwner);
-  console.log("data was initialized");
+  const user = await User.findOne({ username: "jyothi" });
+
+  for (let obj of initData.data) {
+
+    // Upload image URL to Cloudinary
+    const result = await cloudinary.uploader.upload(obj.image.url, {
+  folder: "Dwellio_DEV"
+});
+
+    // Replace image object with Cloudinary response
+    obj.image = {
+      url: result.secure_url,
+      filename: result.public_id,
+    };
+
+    const listing = new Listing({
+      ...obj,
+      owner: user._id   // safer than hardcoding id
+    });
+
+    await listing.save();
+  }
+
+  console.log("Data initialized with Cloudinary images ✅");
 };
+
 
 initDB();

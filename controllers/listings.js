@@ -1,3 +1,4 @@
+const { cloudinary } = require("../cloudConfig");
 const Listing = require("../models/listing");
 
 // INDEX
@@ -35,12 +36,22 @@ module.exports.showListing = async (req, res) => {
 // CREATE
 module.exports.createListing = async (req, res) => {
   const newListing = new Listing(req.body.listing);
+
+  if (req.file) {
+    newListing.image = {
+      url: req.file.path,
+      filename: req.file.filename
+    };
+  }
+
   newListing.owner = req.user._id;
 
   await newListing.save();
+
   req.flash("success", "New listing created!");
   res.redirect("/listings");
 };
+
 
 // EDIT
 module.exports.renderEditForm = async (req, res) => {
@@ -54,16 +65,48 @@ module.exports.renderEditForm = async (req, res) => {
 module.exports.updateListing = async (req, res) => {
   const { id } = req.params;
 
-  await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+  let listing = await Listing.findByIdAndUpdate(id, {
+    ...req.body.listing
+  });
+
+  // If user uploaded new image
+  if (req.file) {
+
+    // Delete old image from Cloudinary
+    if (listing.image && listing.image.filename) {
+      await cloudinary.uploader.destroy(listing.image.filename);
+    }
+
+    // Save new image
+    listing.image = {
+      url: req.file.path,
+      filename: req.file.filename
+    };
+
+    await listing.save();
+  }
+
   req.flash("success", "Listing updated successfully!");
   res.redirect(`/listings/${id}`);
 };
+
+
 
 // DELETE
 module.exports.deleteListing = async (req, res) => {
   const { id } = req.params;
 
+  const listing = await Listing.findById(id);
+
+  // Delete image from Cloudinary
+  if (listing.image && listing.image.filename) {
+    await cloudinary.uploader.destroy(listing.image.filename);
+  }
+
+  // Delete listing from MongoDB
   await Listing.findByIdAndDelete(id);
+
   req.flash("success", "Listing deleted successfully!");
   res.redirect("/listings");
 };
+
