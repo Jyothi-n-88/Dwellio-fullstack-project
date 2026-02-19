@@ -1,5 +1,9 @@
 const { cloudinary } = require("../cloudConfig");
 const Listing = require("../models/listing");
+const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+
+const mapToken = process.env.MAP_TOKEN;
+const geocoder = mbxGeocoding({ accessToken: mapToken });
 
 // INDEX
 module.exports.index = async (req, res) => {
@@ -34,9 +38,24 @@ module.exports.showListing = async (req, res) => {
 };
 
 // CREATE
+// CREATE
 module.exports.createListing = async (req, res) => {
+
+  // 🔥 Step 1: Geocode location
+  const geoData = await geocoder
+    .forwardGeocode({
+      query: req.body.listing.location + ", " + req.body.listing.country,
+      limit: 1
+    })
+    .send();
+
+  // 🔥 Step 2: Create listing
   const newListing = new Listing(req.body.listing);
 
+  // 🔥 Step 3: Save geometry from Mapbox
+  newListing.geometry = geoData.body.features[0].geometry;
+
+  // 🔥 Step 4: Handle image
   if (req.file) {
     newListing.image = {
       url: req.file.path,
@@ -44,6 +63,7 @@ module.exports.createListing = async (req, res) => {
     };
   }
 
+  // 🔥 Step 5: Save owner
   newListing.owner = req.user._id;
 
   await newListing.save();
@@ -51,6 +71,7 @@ module.exports.createListing = async (req, res) => {
   req.flash("success", "New listing created!");
   res.redirect("/listings");
 };
+
 
 
 // EDIT

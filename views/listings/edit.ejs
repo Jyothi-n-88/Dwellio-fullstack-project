@@ -33,6 +33,29 @@
          </div>
       </div>
 
+      <div class="mb-3">
+  <label class="form-label">Current Image</label>
+  <br>
+
+  <% if (listing.image && listing.image.url) { %>
+   <%
+  const previewImage = listing.image.url.replace(
+    "/upload",
+    "/upload/w_400,h_250,c_fill,g_auto,q_auto:low,f_auto,e_blur:70"
+  );
+%>
+
+
+
+<img 
+  src="<%= previewImage %>" 
+  alt="Current Image"
+  class="img-thumbnail mb-3"
+>
+
+  <% } %>
+</div>
+
      <div class="mb-3">
         <label for="image" class="form-label">Upload New Image</label>
         <input

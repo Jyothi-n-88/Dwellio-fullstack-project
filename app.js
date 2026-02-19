@@ -27,6 +27,7 @@ const loginrouter = require("./routes/login");
 const multer = require("multer");
 const { storage } = require("./cloudConfig");
 const upload = multer({ storage });
+app.locals.mapToken = process.env.MAP_TOKEN;
 
 async function main() {
   await mongoose.connect(MONGO_URL);

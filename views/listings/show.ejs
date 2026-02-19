@@ -144,4 +144,25 @@
     <button class="btn btn-success">Submit Review</button>
   </form>
 </div>
+<hr>
+
+<!-- Map Section -->
+<div class="container mt-5 mb-5" style="max-width: 900px;">
+  <h4 class="mb-3">Where you'll be</h4>
+  <div id="map" style="height: 450px; width: 100%; border-radius: 12px;"></div>
+</div>
+
+<% if (listing.geometry && listing.geometry.coordinates) { %>
+
+<script>
+  const mapData = {
+    token: "<%= mapToken %>",
+    coordinates: <%- JSON.stringify(listing.geometry.coordinates) %>
+  };
+</script>
+
+<script src="/js/map.js"></script>
+
+<% } %>
+
 
