@@ -156,9 +156,11 @@
 
 <script>
   const mapData = {
-    token: "<%= mapToken %>",
-    coordinates: <%- JSON.stringify(listing.geometry.coordinates) %>
-  };
+  token: "<%= mapToken %>",
+  coordinates: <%- JSON.stringify(listing.geometry.coordinates) %>,
+  title: "<%= listing.title %>",
+  location: "<%= listing.location %>"
+};
 </script>
 
 <script src="/js/map.js"></script>

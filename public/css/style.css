@@ -199,3 +199,67 @@ body{
     color: #3d0252 !important;
     transform: scale(1.03);
 }
+
+.custom-marker {
+  width: 40px;
+  height: 40px;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.marker-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s;
+  transform-style: preserve-3d;
+}
+
+.custom-marker:hover .marker-inner {
+  transform: rotateY(180deg);
+}
+
+.marker-front,
+.marker-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  font-size: 30px;
+  color: #ff385c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backface-visibility: hidden;
+}
+
+.marker-back {
+  transform: rotateY(180deg);
+}
+/* Popup Styling */
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.custom-popup {
+  padding: 15px;
+  font-family: inherit;
+}
+
+.popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.popup-location {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.custom-marker:hover {
+  transform: scale(1.15);
+  transition: 0.2s ease;
+}

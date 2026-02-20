@@ -41,9 +41,6 @@ main()
     console.error("MongoDB connection error:", err);
   });
 
-app.get("/", (req, res) => {
-  res.send("Server is running 🚀");
-});
 const sessionOptions={
   secret: 'dwellio@123',
   resave: false,

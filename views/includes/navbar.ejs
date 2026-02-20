@@ -2,7 +2,7 @@
   <div class="container-fluid px-4">
 
     <!-- Logo -->
-    <a class="navbar-brand brand-logo d-flex align-items-center" href="/">
+    <a class="navbar-brand brand-logo d-flex align-items-center" href="/listings">
   <i class="fa-solid fa-compass me-2"></i>
   <span>Dwellio</span>
 </a>
@@ -18,18 +18,16 @@
 
       <!-- Left Side Links -->
       <div class="navbar-nav">
-        <a class="nav-link fw-semibold" href="/">Home</a>
-        <a class="nav-link fw-semibold" href="/listings">All Listings</a>
-        <a class="nav-link fw-semibold" href="/listings/new">Add New List</a>
+        <a class="nav-link fw-semibold" href="/listings">Explore</a>
       </div>
 
       <!-- RIGHT SIDE (Airbnb Style) -->
       <div class="navbar-nav ms-auto align-items-center gap-3">
-
+            <a class="nav-link fw-semibold" href="/listings/new">Dwellio your home</a>
         <% if(!currentUser) { %>
 
-          <a class="nav-link fw-semibold" href="/signup">Sign Up</a>
-          <a class="nav-link fw-semibold" href="/login">Login</a>
+          <a class="nav-link fw-semibold" href="/signup"><b>Sign Up</b></a>
+          <a class="nav-link fw-semibold" href="/login"><b>Login</b></a>
 
         <% } else { %>
 
