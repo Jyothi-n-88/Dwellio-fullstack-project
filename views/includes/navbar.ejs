@@ -18,28 +18,61 @@
 
       <!-- Left Side Links -->
       <div class="navbar-nav">
-        <a class="nav-link fw-semibold" href="/listings">Explore</a>
+        <a class="nav-link fw-semibold" href="/listings">Explore Home</a>
       </div>
+     <form class="search-wrapper mx-auto position-relative" action="/listings" method="GET">
+  
+  <input 
+    type="text" 
+    name="search"
+    id="searchInput"
+    class="search-input-main"
+    placeholder="Search destinations..."
+    autocomplete="off"
+    value="<%= typeof search !== 'undefined' ? search : '' %>"
+  >
 
+  <button type="submit" class="search-btn-main">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+
+  <!-- Suggestions dropdown -->
+  <div id="suggestionsBox" class="suggestions-box d-none"></div>
+
+</form>
       <!-- RIGHT SIDE (Airbnb Style) -->
       <div class="navbar-nav ms-auto align-items-center gap-3">
-            <a class="nav-link fw-semibold" href="/listings/new">Dwellio your home</a>
-        <% if(!currentUser) { %>
 
-          <a class="nav-link fw-semibold" href="/signup"><b>Sign Up</b></a>
-          <a class="nav-link fw-semibold" href="/login"><b>Login</b></a>
+  <a class="nav-link host-btn" href="/listings/new">
+    Switch to hosting
+  </a>
 
-        <% } else { %>
+  <% if(!currentUser) { %>
 
-          <span class="nav-link fw-semibold text-muted">
-            Hello, <%= currentUser.username %>
-          </span>
+    <a class="nav-link fw-semibold" href="/signup">Sign Up</a>
+    <a class="nav-link fw-semibold" href="/login">Login</a>
 
-          <a class="nav-link fw-semibold text-danger" href="/logout">Logout</a>
+  <% }
+   else { %>
 
-        <% } %>
+    <div class="dropdown">
+      <button class="btn profile-btn dropdown-toggle" type="button"
+        data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fa-solid fa-user"></i>
+        <span class="ms-2"><%= currentUser.username %></span>
+      </button>
 
-      </div>
+      <ul class="dropdown-menu dropdown-menu-end shadow">
+        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+        <li><a class="dropdown-item" href="/listings?user=<%= currentUser._id %>">My Listings</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-danger" href="/logout">Logout</a></li>
+      </ul>
+    </div>
+
+  <% } %>
+
+</div>
 
     </div>
   </div>

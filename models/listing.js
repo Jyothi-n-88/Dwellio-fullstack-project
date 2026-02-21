@@ -27,7 +27,7 @@ const listingSchema = new Schema({
   location: String,
   country: String,
   owner: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "User"
   },
   reviews: [

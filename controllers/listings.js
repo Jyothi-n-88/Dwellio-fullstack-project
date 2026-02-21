@@ -7,9 +7,163 @@ const geocoder = mbxGeocoding({ accessToken: mapToken });
 
 // INDEX
 module.exports.index = async (req, res) => {
-  const allListings = await Listing.find({});
-  res.render("listings/index.ejs", { allListings });
+  const { search ,user} = req.query;
+  
+  let filter = {};
+  let isMyListings = false;
+
+  if (search) {
+    filter.location = { $regex: search, $options: "i" };
+  }
+   if (user) {
+    filter.owner = user;
+    isMyListings = true;
+  }
+
+  const allListings = await Listing.find(filter);
+
+  const listingsGeoJSON = {
+    type: "FeatureCollection",
+    features: allListings.map(listing => ({
+      type: "Feature",
+      geometry: listing.geometry,
+      properties: {
+        id: listing._id,
+        title: listing.title,
+        location: listing.location
+      }
+    }))
+  };
+
+  res.render("listings/index", { 
+    allListings,
+    listingsGeoJSON,
+    search,
+    isMyListings 
+  });
 };
+
+// NEW
+module.exports.renderNewForm = (req, res) => {
+  res.render("listings/new.ejs");
+};
+
+// SHOW
+module.exports.showListing = async (req, res) => {
+  const { id } = req.params;
+
+  const listing = await Listing.findById(id)
+    .populate({
+      path: "reviews",
+      populate: {
+        path: "author"
+      }
+    })
+    .populate("owner");
+
+  if (!listing) {
+    req.flash("error", "Listing not found!");
+    return res.redirect("/listings");
+  }
+
+  res.render("listings/show.ejs", { listing });
+};
+
+// CREATE
+// CREATE
+module.exports.createListing = async (req, res) => {
+
+  // 🔥 Step 1: Geocode location
+  const geoData = await geocoder
+    .forwardGeocode({
+      query: req.body.listing.location + ", " + req.body.listing.country,
+      limit: 1
+    })
+    .send();
+
+  // 🔥 Step 2: Create listing
+  const newListing = new Listing(req.body.listing);
+
+  // 🔥 Step 3: Save geometry from Mapbox
+  newListing.geometry = geoData.body.features[0].geometry;
+
+  // 🔥 Step 4: Handle image
+  if (req.file) {
+    newListing.image = {
+      url: req.file.path,
+      filename: req.file.filename
+    };
+  }
+
+  // 🔥 Step 5: Save owner
+  newListing.owner = req.user._id;
+
+  await newListing.save();
+
+  req.flash("success", "New listing created!");
+  res.redirect("/listings");
+};
+
+
+
+// EDIT
+module.exports.renderEditForm = async (req, res) => {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+
+  res.render("listings/edit.ejs", { listing });
+};
+
+// UPDATE
+module.exports.updateListing = async (req, res) => {
+  const { id } = req.params;
+
+  let listing = await Listing.findByIdAndUpdate(id, {
+    ...req.body.listing
+  });
+
+  // If user uploaded new image
+  if (req.file) {
+
+    // Delete old image from Cloudinary
+    if (listing.image && listing.image.filename) {
+      await cloudinary.uploader.destroy(listing.image.filename);
+    }
+
+    // Save new image
+    listing.image = {
+      url: req.file.path,
+      filename: req.file.filename
+    };
+
+    await listing.save();
+  }
+
+  req.flash("success", "Listing updated successfully!");
+  res.redirect(`/listings/${id}`);
+};
+
+
+
+// DELETE
+module.exports.deleteListing = async (req, res) => {
+  const { id } = req.params;
+
+  const listing = await Listing.findById(id);
+
+  // Delete image from Cloudinary
+  if (listing.image && listing.image.filename) {
+    await cloudinary.uploader.destroy(listing.image.filename);
+  }
+
+  // Delete listing from MongoDB
+  await Listing.findByIdAndDelete(id);
+
+  req.flash("success", "Listing deleted successfully!");
+  res.redirect("/listings");
+};
+
+
 
 // NEW
 module.exports.renderNewForm = (req, res) => {

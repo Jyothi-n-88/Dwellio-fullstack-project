@@ -28,6 +28,7 @@ const multer = require("multer");
 const { storage } = require("./cloudConfig");
 const upload = multer({ storage });
 app.locals.mapToken = process.env.MAP_TOKEN;
+const userrouter = require("./routes/users");
 
 async function main() {
   await mongoose.connect(MONGO_URL);
@@ -74,7 +75,7 @@ app.use("/listings",listingrouter);
 app.use("/listings/:id/reviews",reviewrouter);
 app.use(signuprouter);
 app.use(loginrouter);
-
+app.use("/", userrouter);
 app.use( (req, res, next) => {
   next(new ExpressError(404, "Page Not Found!"));
 });

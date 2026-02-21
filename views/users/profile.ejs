@@ -1,0 +1,39 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-5">
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+
+      <div class="card shadow-sm p-4">
+
+        <div class="d-flex align-items-center mb-4">
+          <div class="profile-avatar me-3">
+            <i class="fa-solid fa-user fa-2x"></i>
+          </div>
+          <div>
+            <h4 class="mb-0"><%= user.username %></h4>
+            <small class="text-muted"><%= user.email %></small>
+          </div>
+        </div>
+
+        <hr>
+
+        <p><strong>Member Since:</strong> 
+          <%= user.createdAt ? user.createdAt.toDateString() : "N/A" %>
+        </p>
+
+        <p><strong>Total Listings:</strong> 
+          <%= userListings.length %>
+        </p>
+
+        <a href="/listings/new" class="btn btn-danger mt-3">
+          Create New Listing
+        </a>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>

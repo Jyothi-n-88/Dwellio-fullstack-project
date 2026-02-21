@@ -6,7 +6,19 @@ const listingsController = require("../controllers/listings");
 const multer = require("multer");
 const { storage } = require("../cloudConfig");   // adjust path if needed
 const upload = multer({ storage });
+const Listing = require("../models/listing");
 
+router.get("/suggestions", async (req, res) => {
+  const { q } = req.query;
+
+  if (!q) return res.json([]);
+
+  const suggestions = await Listing.find({
+    location: { $regex: q, $options: "i" }
+  }).distinct("location");
+
+  res.json(suggestions.slice(0, 5));
+});
 router.route("/")
 .get(wrapAsync(listingsController.index))
 .post(

@@ -1,35 +1,74 @@
 <% layout("/layouts/boilerplate") %>
 
-<h3 class="mb-4 indexhead">All Listings</h3>
+<% if(allListings.length === 0) { %>
+<% if(isMyListings) { %>
 
-<div class="row g-4">
-  <% for (let listing of allListings) { %>
-    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 out">
-      <a href="/listings/<%= listing._id %>" class="listing-link">
-        <div class="card listing-card">
+    <div class="text-center mt-5">
+      <i class="fa-solid fa-house-circle-exclamation fa-3x mb-3 text-muted"></i>
+      <h4>You haven't created any listings yet.</h4>
+      <p class="text-muted">
+        Start hosting your place and earn with Dwellio.
+      </p>
 
-          <!-- Image -->
-          <img 
-            src="<%= listing.image?.url || 'https://q-xx.bstatic.com/xdata/images/hotel/max500/672628389.jpg' %>" 
-            class="card-img-top listing-img" 
-            alt="listing image"
-          >
-
-          <div class="card-body">
-            <p class="card-text">
-              <%= listing.title %>
-            </p>
-
-            <!-- Price -->
-            <p class="listing-price">
-              <span class="fw-bold">
-                ₹ <%= listing.price?.toLocaleString("en-IN") || "N/A" %>
-              </span> / night
-            </p>
-          </div>
-
-        </div>
+      <a href="/listings/new" class="btn btn-dark mt-3">
+        Switch to Hosting
       </a>
     </div>
+
+  <% } else { %>
+
+    <div class="text-center mt-5">
+      <h4>No listings found.</h4>
+      <p class="text-muted">
+        Try searching for a different location.
+      </p>
+    </div>
+
   <% } %>
-</div>
+
+<% } else { %>
+<h3 class="mb-4 indexhead">All Listings</h3>
+  <div class="row g-4">
+    <% for (let listing of allListings) { %>
+      <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 out">
+        <a href="/listings/<%= listing._id %>" class="listing-link">
+          <div class="card listing-card">
+
+            <img 
+              src="<%= listing.image?.url || 'https://q-xx.bstatic.com/xdata/images/hotel/max500/672628389.jpg' %>" 
+              class="card-img-top listing-img" 
+              alt="listing image"
+            >
+
+            <div class="card-body">
+              <p class="card-text">
+                <%= listing.title %>
+              </p>
+
+              <p class="listing-price">
+                <span class="fw-bold">
+                  ₹ <%= listing.price?.toLocaleString("en-IN") || "N/A" %>
+                </span> / night
+              </p>
+            </div>
+
+          </div>
+        </a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Map only shows if listings exist -->
+  <div id="map" style="width:100%; height:500px;" class="mt-5"></div>
+
+  <script>
+    const mapData = {
+      token: "<%= mapToken %>",
+      listings: <%- JSON.stringify(listingsGeoJSON) %>
+    };
+  </script>
+  <% script = `
+<script src="/js/indexMap.js"></script>
+` %>
+
+<% } %>
