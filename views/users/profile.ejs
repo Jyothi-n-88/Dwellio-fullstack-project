@@ -8,9 +8,55 @@
       <div class="card shadow-sm p-4">
 
         <div class="d-flex align-items-center mb-4">
-          <div class="profile-avatar me-3">
-            <i class="fa-solid fa-user fa-2x"></i>
-          </div>
+          <div class="me-3 text-center position-relative">
+
+  <form id="avatarForm"
+        action="/profile/image?_method=PUT"
+        method="POST"
+        enctype="multipart/form-data">
+
+    <label for="avatarInput" class="avatar-wrapper">
+
+      <% if(user.image && user.image.url) { %>
+        <img 
+          src="<%= user.image.url %>" 
+          class="rounded-circle avatar-img"
+          width="110"
+          height="110">
+      <% } else { %>
+        <div class="avatar-default d-flex justify-content-center align-items-center rounded-circle bg-light">
+          <i class="fa-solid fa-user fa-2x text-muted"></i>
+        </div>
+      <% } %>
+
+      <!-- Camera Icon -->
+      <div class="camera-icon">
+        <i class="fa-solid fa-camera"></i>
+      </div>
+
+    </label>
+
+    <!-- Hidden file input -->
+    <input 
+      type="file"
+      name="profileImage"
+      id="avatarInput"
+      class="d-none"
+      onchange="document.getElementById('avatarForm').submit()">
+
+  </form>
+
+  <% if(user.image && user.image.url) { %>
+    <form action="/profile/image?_method=DELETE"
+          method="POST"
+          class="mt-2">
+      <button class="btn btn-sm btn-outline-danger">
+        Remove Photo
+      </button>
+    </form>
+  <% } %>
+
+</div>
           <div>
             <h4 class="mb-0"><%= user.username %></h4>
             <small class="text-muted"><%= user.email %></small>
@@ -30,7 +76,7 @@
         <a href="/listings/new" class="btn btn-danger mt-3">
           Create New Listing
         </a>
-
+       <hr>
       </div>
 
     </div>

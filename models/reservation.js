@@ -1,0 +1,19 @@
+const mongoose = require("mongoose");
+
+const reservationSchema = new mongoose.Schema({
+  listing: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Listing",
+    required: true
+  },
+  guest: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+  checkIn: Date,
+  checkOut: Date,
+  totalPrice: Number
+});
+
+module.exports = mongoose.model("Reservation", reservationSchema);

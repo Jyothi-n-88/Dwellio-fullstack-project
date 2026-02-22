@@ -3,12 +3,24 @@ const Schema = mongoose.Schema;
 
 const passportLocalMongoose = require("passport-local-mongoose").default;
 
-const userSchema = new Schema({
-    email: {
-        type: String,
-        required: true
-    }
-},{ timestamps: true });
+const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true
+  },
+  image: {
+    url: String,
+    filename: String
+  },
+  wishlist: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Listing"
+  }
+]
+}, { timestamps: true });
 
 userSchema.plugin(passportLocalMongoose);
 

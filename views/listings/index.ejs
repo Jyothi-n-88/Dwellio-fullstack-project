@@ -31,30 +31,62 @@
   <div class="row g-4">
     <% for (let listing of allListings) { %>
       <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 out">
-        <a href="/listings/<%= listing._id %>" class="listing-link">
-          <div class="card listing-card">
+  <div class="card listing-card position-relative">
 
-            <img 
-              src="<%= listing.image?.url || 'https://q-xx.bstatic.com/xdata/images/hotel/max500/672628389.jpg' %>" 
-              class="card-img-top listing-img" 
-              alt="listing image"
-            >
+    <% if(currentUser) { %>
+  <div style="position:absolute; top:10px; right:10px; z-index:1000;">
+    <% if(currentUser.wishlist && 
+          currentUser.wishlist.some(id => 
+            id.toString() === listing._id.toString()
+          )) { %>
 
-            <div class="card-body">
-              <p class="card-text">
-                <%= listing.title %>
-              </p>
+      <form action="/wishlist/<%= listing._id %>?_method=DELETE" method="POST">
+        <button type="submit"
+          style="background:white; border:none; border-radius:50%; padding:8px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+          <i class="fa-solid fa-heart text-danger"></i>
+        </button>
+      </form>
 
-              <p class="listing-price">
-                <span class="fw-bold">
-                  ₹ <%= listing.price?.toLocaleString("en-IN") || "N/A" %>
-                </span> / night
-              </p>
-            </div>
+    <% } else { %>
 
-          </div>
-        </a>
-      </div>
+      <form action="/wishlist/<%= listing._id %>" method="POST">
+        <button type="submit"
+          style="background:white; border:none; border-radius:50%; padding:8px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+          <i class="fa-regular fa-heart"></i>
+        </button>
+      </form>
+
+    <% } %>
+  </div>
+<% } %>
+    <!-- Clickable Image -->
+    <a href="/listings/<%= listing._id %>" class="listing-link">
+      <img 
+        src="<%= listing.image?.url || 'https://q-xx.bstatic.com/xdata/images/hotel/max500/672628389.jpg' %>" 
+        class="card-img-top listing-img" 
+        alt="listing image">
+    </a>
+
+    <!-- Card Body -->
+    <div class="card-body">
+      <a href="/listings/<%= listing._id %>" 
+         class="text-decoration-none text-dark">
+
+        <p class="card-text">
+          <%= listing.title %>
+        </p>
+
+        <p class="listing-price">
+          <span class="fw-bold">
+            ₹ <%= listing.price?.toLocaleString("en-IN") || "N/A" %>
+          </span> / night
+        </p>
+
+      </a>
+    </div>
+
+  </div>
+</div>
     <% } %>
   </div>
 

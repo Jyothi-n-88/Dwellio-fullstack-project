@@ -29,6 +29,7 @@ const { storage } = require("./cloudConfig");
 const upload = multer({ storage });
 app.locals.mapToken = process.env.MAP_TOKEN;
 const userrouter = require("./routes/users");
+const reservationRoutes = require("./routes/reservation");
 
 async function main() {
   await mongoose.connect(MONGO_URL);
@@ -59,23 +60,25 @@ app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
-app.use((req, res, next) => {
-  res.locals.currentUser = req.user;
+app.use(async (req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+
+  if (req.user) {
+    const user = await User.findById(req.user._id);
+    res.locals.currentUser = user;
+  } else {
+    res.locals.currentUser = null;
+  }
+
   next();
 });
-
-app.use((req,res,next)=>
-{
-  res.locals.success=req.flash("success");
-  res.locals.error = req.flash("error");
-  res.locals.currentUser = req.user;
-  next();
-})
 app.use("/listings",listingrouter);
 app.use("/listings/:id/reviews",reviewrouter);
 app.use(signuprouter);
 app.use(loginrouter);
 app.use("/", userrouter);
+app.use("/reservations", reservationRoutes);
 app.use( (req, res, next) => {
   next(new ExpressError(404, "Page Not Found!"));
 });

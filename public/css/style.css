@@ -403,3 +403,76 @@ body{
   align-items: center;
   justify-content: center;
 }
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.avatar-img {
+  object-fit: cover;
+  transition: 0.3s ease;
+}
+
+.avatar-default {
+  width: 110px;
+  height: 110px;
+  transition: 0.3s ease;
+}
+
+.avatar-wrapper:hover .avatar-img,
+.avatar-wrapper:hover .avatar-default {
+  opacity: 0.8;
+}
+
+.camera-icon {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: black;
+  color: white;
+  border-radius: 50%;
+  padding: 6px;
+  font-size: 12px;
+  transition: 0.3s ease;
+}
+
+.avatar-wrapper:hover .camera-icon {
+  transform: scale(1.1);
+}
+
+.listing-card .btn {
+  border: none;
+}
+
+.listing-card .btn:hover {
+  transform: scale(1.1);
+  transition: 0.2s ease;
+}
+
+.booking-box {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.reserve-btn {
+  background: linear-gradient(90deg, #ff385c, #d70466);
+  border: none;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+.reserve-btn:hover {
+  transform: scale(1.03);
+}
+.reserve-card {
+  border: 1px solid #eaeaea;
+  position: sticky;
+  top: 100px;
+  background: #fff;
+}
+
+.left-card {
+  text-align: center;
+}

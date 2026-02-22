@@ -1,0 +1,29 @@
+<% layout("/layouts/boilerplate") %>
+
+<h2 class="mb-4">My Wishlist</h2>
+
+<div class="row">
+  <% listings.forEach(listing => { %>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+
+        <img 
+          src="<%= listing.image.url %>" 
+          class="card-img-top"
+          style="height: 220px; object-fit: cover;"
+        >
+
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title"><%= listing.title %></h5>
+          <p class="card-text">₹<%= listing.price %></p>
+
+          <a href="/listings/<%= listing._id %>" 
+             class="btn btn-dark mt-auto">
+            View
+          </a>
+        </div>
+
+      </div>
+    </div>
+  <% }) %>
+</div>
