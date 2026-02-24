@@ -6,14 +6,24 @@ const multer = require("multer");
 const { cloudinary,storage } = require("../cloudConfig");
 const upload = multer({ storage });
 const User = require("../models/user");
+const Reservation = require("../models/reservation");
 
 router.get("/profile", isLoggedIn, async (req, res) => {
 
-  const userListings = await Listing.find({ owner: req.user._id });
+  // Listings created by the user
+  const userListings = await Listing.find({
+    owner: req.user._id
+  });
+
+  // Reservations made by the user
+  const reservations = await Reservation.find({
+    guest: req.user._id
+  }).populate("listing");
 
   res.render("users/profile", {
     user: req.user,
-    userListings
+    userListings,
+    reservations
   });
 });
 

@@ -13,7 +13,11 @@ const reservationSchema = new mongoose.Schema({
   },
   checkIn: Date,
   checkOut: Date,
-  totalPrice: Number
+  totalPrice: Number,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 module.exports = mongoose.model("Reservation", reservationSchema);

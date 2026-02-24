@@ -466,13 +466,24 @@ body{
 .reserve-btn:hover {
   transform: scale(1.03);
 }
-.reserve-card {
-  border: 1px solid #eaeaea;
-  position: sticky;
-  top: 100px;
-  background: #fff;
-}
 
 .left-card {
+  max-width: 750px;
+  width: 100%;
   text-align: center;
+}
+
+.reserve-wrapper {
+  position: absolute;
+  right: -72%;
+  top: 450px; /* adjust if needed */
+}
+
+.reserve-card {
+  width: 360px;
+  border: 1px solid #eaeaea;
+  background: white;
+}
+html, body {
+  overflow-x: hidden;
 }

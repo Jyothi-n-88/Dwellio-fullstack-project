@@ -43,4 +43,25 @@ router.post("/:id", isLoggedIn, async (req, res) => {
   res.redirect("/profile");
 });
 
+// CANCEL RESERVATION
+router.delete("/:reservationId", isLoggedIn, async (req, res) => {
+  const { reservationId } = req.params;
+
+  const reservation = await Reservation.findById(reservationId);
+
+  if (!reservation) {
+    req.flash("error", "Reservation not found.");
+    return res.redirect("/profile");
+  }
+
+  if (!reservation.guest.equals(req.user._id)) {
+    req.flash("error", "Not authorized.");
+    return res.redirect("/profile");
+  }
+
+  await Reservation.findByIdAndDelete(reservationId);
+
+  req.flash("success", "Reservation cancelled successfully.");
+  res.redirect("/profile");
+});
 module.exports = router;

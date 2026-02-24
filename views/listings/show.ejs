@@ -1,12 +1,11 @@
 <% layout("/layouts/boilerplate") %>
 
-<div class="container mt-5 " style="max-width: 1100px;">
+<div class="container mt-5" style="max-width: 1100px;">
   <div class="row">
 
-    <!-- LEFT SIDE -->
-    <div class="col-lg-7">
-
-      <div class="card shadow-sm p-4 rounded-4">
+    <!-- LEFT SIDE (FULL WIDTH BUT CENTERED CARD) -->
+    <div class="col-11 d-flex justify-content-center">
+      <div class="card shadow-sm p-4 rounded-4 left-card">
 
         <!-- Image -->
         <img 
@@ -38,9 +37,8 @@
 
     </div>
     <!-- RIGHT SIDE - RESERVE CARD -->
-    <div class="col-lg-4 ">
-
-      <div class="reserve-card shadow-lg p-4 rounded-4 w-100" style="max-width: 320px;">
+    <div class="reserve-wrapper ">
+      <div class="reserve-card shadow-lg p-4 rounded-4">
 
         <h4 class="fw-bold">
           ₹<%= listing.price.toLocaleString("en-IN") %>
@@ -82,7 +80,7 @@
 
   </div>
 </div>
-<hr>
+
 <!-- Reviews Section -->
 <div class="container mt-5" style="max-width: 900px;">
   <div class="row justify-content-center">
@@ -211,5 +209,69 @@
 ` %>
 
 <% } %>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
+  // Get elements safely without modifying layout
+  const reserveCard = document.querySelector(".reserve-card");
+  if (!reserveCard) return;
+
+  const priceText = reserveCard.querySelector("h4").innerText;
+  const pricePerNight = parseInt(priceText.replace(/[^0-9]/g, ""));
+
+  const checkin = reserveCard.querySelector("input[name='checkIn']");
+  const checkout = reserveCard.querySelector("input[name='checkOut']");
+  const cancelText = reserveCard.querySelector("p.text-muted strong");
+
+  // Create total display dynamically (no layout change)
+  const totalDiv = document.createElement("div");
+  totalDiv.style.marginBottom = "15px";
+  totalDiv.style.fontWeight = "bold";
+  totalDiv.innerText = "Total: ₹" + pricePerNight.toLocaleString("en-IN");
+
+  const form = reserveCard.querySelector("form");
+  form.insertBefore(totalDiv, form.querySelector("button"));
+
+  const today = new Date().toISOString().split("T")[0];
+  checkin.setAttribute("min", today);
+  checkout.setAttribute("min", today);
+
+  function updateCalculation() {
+    if (checkin.value && checkout.value) {
+      const start = new Date(checkin.value);
+      const end = new Date(checkout.value);
+      const nights = (end - start) / (1000 * 60 * 60 * 24);
+
+      if (nights > 0) {
+        const total = pricePerNight * nights;
+        totalDiv.innerText = "Total: ₹" + total.toLocaleString("en-IN");
+      } else {
+        totalDiv.innerText = "Total: ₹" + pricePerNight.toLocaleString("en-IN");
+      }
+    }
+  }
+
+  function updateCancellation() {
+    if (checkin.value) {
+      const cancelDate = new Date(checkin.value);
+      cancelDate.setDate(cancelDate.getDate() - 1);
+
+      cancelText.innerText =
+        cancelDate.toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "long"
+        });
+    }
+  }
+
+  checkin.addEventListener("change", function () {
+    checkout.setAttribute("min", checkin.value);
+    updateCalculation();
+    updateCancellation();
+  });
+
+  checkout.addEventListener("change", updateCalculation);
+
+});
+</script>
 

@@ -69,7 +69,7 @@
           <%= user.createdAt ? user.createdAt.toDateString() : "N/A" %>
         </p>
 
-        <p><strong>Total Listings:</strong> 
+        <p><strong>Total Hosted Listings:</strong> 
           <%= userListings.length %>
         </p>
 
@@ -77,6 +77,44 @@
           Create New Listing
         </a>
        <hr>
+       <h2 class="mb-4">My Reservations</h2>
+
+<% if (reservations.length === 0) { %>
+  <p>No reservations yet.</p>
+<% } else { %>
+
+  <% reservations.forEach(reservation => { %>
+
+    <div class="card mb-4 p-3 shadow-sm">
+
+      <h5><%= reservation.listing.title %></h5>
+
+      <p>
+        <strong>Check-in:</strong>
+        <%= reservation.checkIn.toDateString() %>
+      </p>
+
+      <p>
+        <strong>Check-out:</strong>
+        <%= reservation.checkOut.toDateString() %>
+      </p>
+
+      <p>
+        <strong>Total Paid:</strong>
+        ₹<%= reservation.totalPrice.toLocaleString("en-IN") %>
+      </p>
+
+      <form action="/reservations/<%= reservation._id %>?_method=DELETE" method="POST">
+        <button class="btn btn-danger btn-sm">
+          Cancel Reservation
+        </button>
+      </form>
+
+    </div>
+
+  <% }) %>
+
+<% } %>
       </div>
 
     </div>
