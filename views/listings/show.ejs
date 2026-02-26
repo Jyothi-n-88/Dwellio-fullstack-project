@@ -32,7 +32,24 @@
           <i class="fa-solid fa-location-dot"></i>
           <%= listing.location %>, <%= listing.country %>
         </p>
+       <% if (currentUser && listing.owner.equals(currentUser._id)) { %>
 
+  <div class="mt-3">
+    <a href="/listings/<%= listing._id %>/edit" 
+       class="btn btn-outline-primary btn-sm">
+      Edit
+    </a>
+
+    <form action="/listings/<%= listing._id %>?_method=DELETE"
+          method="POST"
+          class="d-inline">
+      <button class="btn btn-outline-danger btn-sm">
+        Delete
+      </button>
+    </form>
+  </div>
+
+<% } %>
       </div>
 
     </div>

@@ -12,12 +12,12 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
-const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT || 8080;
 const ExpressError=require("./utils/expressError.js");
 const listingrouter=require("./routes/listings.js")
 const reviewrouter=require("./routes/reviews.js")
 const session = require('express-session');
+const MongoStore = require("connect-mongo").default;
 const flash = require('connect-flash');
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -30,9 +30,10 @@ const upload = multer({ storage });
 app.locals.mapToken = process.env.MAP_TOKEN;
 const userrouter = require("./routes/users");
 const reservationRoutes = require("./routes/reservation");
+const dburl=process.env.ATLASDB_URL;
 
 async function main() {
-  await mongoose.connect(MONGO_URL);
+  await mongoose.connect(dburl);
 }
 
 main()
@@ -43,8 +44,20 @@ main()
     console.error("MongoDB connection error:", err);
   });
 
+const store =MongoStore.create({
+  mongoUrl: dburl,
+  crypto: {
+    secret: process.env.SECRET
+  },
+  touchAfter: 24 * 3600 // 24 hours
+});
+
+store.on("error", function (e) {
+  console.log("SESSION STORE ERROR", e);
+});
 const sessionOptions={
-  secret: 'dwellio@123',
+   store,
+  secret:  process.env.SECRET,
   resave: false,
   saveUninitialized: true,
  cookie:{
