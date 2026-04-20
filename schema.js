@@ -7,12 +7,16 @@ module.exports.listingSchema = Joi.object({
     location: Joi.string().required(),
     country: Joi.string().required(),
     price: Joi.number().required().min(0),
-
+    totalRooms: Joi.number().required().min(1),
+    contact: Joi.string().required().pattern(/^[0-9+\s-]{10,15}$/), // Allows numbers, +, and spaces
+    category: Joi.string()
+      .valid("Trending", "Rooms", "Iconic Cities", "Mountains", "Castles", "Amazing Pools", "Camping", "Farms", "Arctic", "Domes", "Boats")
+      .required(),
     image: Joi.object({
       filename: Joi.string().allow("", null),
       url: Joi.string().allow("", null),
-    }).optional()
-  }).required()
+    }).optional(),
+  }).required(),
 });
 
 module.exports.reviewSchema = Joi.object({
@@ -20,4 +24,10 @@ module.exports.reviewSchema = Joi.object({
     rating: Joi.number().required().min(1).max(5),
     comment: Joi.string().required(),
   }).required(),
+});
+
+module.exports.reservationSchema = Joi.object({
+    checkIn: Joi.date().required(),
+    checkOut: Joi.date().required().greater(Joi.ref('checkIn')),
+    roomsToBook: Joi.number().min(1).required(),
 });

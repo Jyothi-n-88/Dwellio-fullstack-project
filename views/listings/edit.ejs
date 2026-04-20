@@ -2,117 +2,50 @@
 
 <div class="row mt-3">
   <div class="col-8 offset-2">
-    <h3>Edit your Listing</h3>
+    <h3 class="mb-4">Edit your Listing</h3>
     
-    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" enctype="multipart/form-data"
-        novalidate class="needs-validation">
+    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" enctype="multipart/form-data" novalidate class="needs-validation">
       
       <div class="mb-3">
         <label for="title" class="form-label">Title</label>
-        <input 
-          name="listing[title]" 
-          value="<%= listing.title %>" 
-          type="text" 
-          class="form-control" 
-          required
-        />
-         <div class="invalid-feedback">
-    Title is required.
-  </div>
+        <input name="listing[title]" value="<%= listing.title %>" type="text" class="form-control" required />
       </div>
 
       <div class="mb-3">
         <label for="description" class="form-label">Description</label>
-        <textarea
-          name="listing[description]"
-          class="form-control"
-          required
-        ><%= listing.description %></textarea>
-         <div class="invalid-feedback">
-            Description is required.
-         </div>
+        <textarea name="listing[description]" class="form-control" required><%= listing.description %></textarea>
       </div>
-
-      <div class="mb-3">
-  <label class="form-label">Current Image</label>
-  <br>
-
-  <% if (listing.image && listing.image.url) { %>
-   <%
-  const previewImage = listing.image.url.replace(
-    "/upload",
-    "/upload/w_400,h_250,c_fill,g_auto,q_auto:low,f_auto,e_blur:70"
-  );
-%>
-
-
-
-<img 
-  src="<%= previewImage %>" 
-  alt="Current Image"
-  class="img-thumbnail mb-3"
->
-
-  <% } %>
-</div>
-
-     <div class="mb-3">
-        <label for="image" class="form-label">Upload New Image</label>
-        <input
-          type="file"
-          name="image"
-          class="form-control"
-          accept="image/*"
-        />
-     </div>
-
 
       <div class="row">
         <div class="mb-3 col-md-4">
-          <label for="price" class="form-label">Price</label>
-          <input 
-            name="listing[price]" 
-            value="<%= listing.price %>" 
-            type="number" 
-            class="form-control"
-            required
-          />
-           <div class="invalid-feedback">
-  Price must be greater than 0.
-</div>
+          <label for="price" class="form-label">Price (₹)</label>
+          <input name="listing[price]" value="<%= listing.price %>" type="number" class="form-control" required min="1" />
         </div>
 
+        <div class="mb-3 col-md-4">
+          <label for="totalRooms" class="form-label">Total Rooms</label>
+          <input name="listing[totalRooms]" value="<%= listing.totalRooms %>" type="number" class="form-control" required min="1" />
+        </div>
+
+        <div class="mb-3 col-md-4">
+          <label for="contact" class="form-label">Contact Number</label>
+          <input name="listing[contact]" value="<%= listing.contact %>" type="text" class="form-control" required />
+        </div>
+      </div>
+
+      <div class="row">
         <div class="mb-3 col-md-8">
+          <label for="location" class="form-label">Location</label>
+          <input name="listing[location]" value="<%= listing.location %>" type="text" class="form-control" required />
+        </div>
+
+        <div class="mb-3 col-md-4">
           <label for="country" class="form-label">Country</label>
-          <input 
-            name="listing[country]" 
-            value="<%= listing.country %>" 
-            type="text" 
-            class="form-control"
-            required
-          />
-          <div class="invalid-feedback">
-  Country is required.
-</div>
+          <input name="listing[country]" value="<%= listing.country %>" type="text" class="form-control" required />
         </div>
       </div>
 
-      <div class="mb-3">
-        <label for="location" class="form-label">Location</label>
-        <input
-          name="listing[location]"
-          value="<%= listing.location %>"
-          type="text"
-          class="form-control"
-          required
-        />
-        <div class="invalid-feedback">
-  Location is required.
-</div>
-      </div>
-
-      <button class="btn btn-dark edit-btn">Edit</button>
-      <br /><br />
+      <button class="btn btn-dark edit-btn w-100 mt-3">Save Changes</button>
     </form>
   </div>
 </div>

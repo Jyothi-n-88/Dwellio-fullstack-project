@@ -7,7 +7,7 @@ const geocoder = mbxGeocoding({ accessToken: mapToken });
 
 // INDEX
 module.exports.index = async (req, res) => {
-  const { search ,user} = req.query;
+  const { search, user, category } = req.query;
   
   let filter = {};
   let isMyListings = false;
@@ -15,9 +15,12 @@ module.exports.index = async (req, res) => {
   if (search) {
     filter.location = { $regex: search, $options: "i" };
   }
-   if (user) {
+  if (user) {
     filter.owner = user;
     isMyListings = true;
+  }
+  if (category) {
+    filter.category = category;
   }
 
   const allListings = await Listing.find(filter);
@@ -38,8 +41,10 @@ module.exports.index = async (req, res) => {
   res.render("listings/index", { 
     allListings,
     listingsGeoJSON,
+    mapToken, // FIXED: Now passing mapToken to the index page
     search,
-    isMyListings 
+    isMyListings,
+    category: category || "" 
   });
 };
 
@@ -51,13 +56,10 @@ module.exports.renderNewForm = (req, res) => {
 // SHOW
 module.exports.showListing = async (req, res) => {
   const { id } = req.params;
-
   const listing = await Listing.findById(id)
     .populate({
       path: "reviews",
-      populate: {
-        path: "author"
-      }
+      populate: { path: "author" }
     })
     .populate("owner");
 
@@ -65,15 +67,11 @@ module.exports.showListing = async (req, res) => {
     req.flash("error", "Listing not found!");
     return res.redirect("/listings");
   }
-
   res.render("listings/show.ejs", { listing });
 };
 
 // CREATE
-// CREATE
 module.exports.createListing = async (req, res) => {
-
-  // 🔥 Step 1: Geocode location
   const geoData = await geocoder
     .forwardGeocode({
       query: req.body.listing.location + ", " + req.body.listing.country,
@@ -81,207 +79,88 @@ module.exports.createListing = async (req, res) => {
     })
     .send();
 
-  // 🔥 Step 2: Create listing
   const newListing = new Listing(req.body.listing);
-
-  // 🔥 Step 3: Save geometry from Mapbox
-  newListing.geometry = geoData.body.features[0].geometry;
-
-  // 🔥 Step 4: Handle image
-  if (req.file) {
-    newListing.image = {
-      url: req.file.path,
-      filename: req.file.filename
-    };
+  
+  // Safety check for geocoding
+  if (geoData.body.features.length > 0) {
+    newListing.geometry = geoData.body.features[0].geometry;
   }
 
-  // 🔥 Step 5: Save owner
-  newListing.owner = req.user._id;
+  if (req.file) {
+    newListing.image = { url: req.file.path, filename: req.file.filename };
+  }
 
+  newListing.owner = req.user._id;
   await newListing.save();
 
   req.flash("success", "New listing created!");
   res.redirect("/listings");
 };
 
-
-
 // EDIT
 module.exports.renderEditForm = async (req, res) => {
   const { id } = req.params;
   const listing = await Listing.findById(id);
-
   res.render("listings/edit.ejs", { listing });
 };
 
 // UPDATE
 module.exports.updateListing = async (req, res) => {
   const { id } = req.params;
+  const { totalRooms, location, country } = req.body.listing;
 
-  let listing = await Listing.findByIdAndUpdate(id, {
-    ...req.body.listing
-  });
-
-  // If user uploaded new image
-  if (req.file) {
-
-    // Delete old image from Cloudinary
-    if (listing.image && listing.image.filename) {
-      await cloudinary.uploader.destroy(listing.image.filename);
-    }
-
-    // Save new image
-    listing.image = {
-      url: req.file.path,
-      filename: req.file.filename
-    };
-
-    await listing.save();
-  }
-
-  req.flash("success", "Listing updated successfully!");
-  res.redirect(`/listings/${id}`);
-};
-
-
-
-// DELETE
-module.exports.deleteListing = async (req, res) => {
-  const { id } = req.params;
-
-  const listing = await Listing.findById(id);
-
-  // Delete image from Cloudinary
-  if (listing.image && listing.image.filename) {
-    await cloudinary.uploader.destroy(listing.image.filename);
-  }
-
-  // Delete listing from MongoDB
-  await Listing.findByIdAndDelete(id);
-
-  req.flash("success", "Listing deleted successfully!");
-  res.redirect("/listings");
-};
-
-
-
-// NEW
-module.exports.renderNewForm = (req, res) => {
-  res.render("listings/new.ejs");
-};
-
-// SHOW
-module.exports.showListing = async (req, res) => {
-  const { id } = req.params;
-
-  const listing = await Listing.findById(id)
-    .populate({
-      path: "reviews",
-      populate: {
-        path: "author"
-      }
-    })
-    .populate("owner");
-
-  if (!listing) {
+  // Check current status before update
+  const currentListing = await Listing.findById(id);
+  if (!currentListing) {
     req.flash("error", "Listing not found!");
     return res.redirect("/listings");
   }
 
-  res.render("listings/show.ejs", { listing });
-};
+  // Safety: Don't allow totalRooms to be less than current bookings
+  if (totalRooms < currentListing.bookedRooms) {
+    req.flash("error", `Cannot set total rooms to ${totalRooms}. ${currentListing.bookedRooms} rooms are already booked.`);
+    return res.redirect(`/listings/${id}/edit`);
+  }
 
-// CREATE
-// CREATE
-module.exports.createListing = async (req, res) => {
-
-  // 🔥 Step 1: Geocode location
+  // 1. Re-geocode for new coordinates
   const geoData = await geocoder
     .forwardGeocode({
-      query: req.body.listing.location + ", " + req.body.listing.country,
+      query: `${location}, ${country}`,
       limit: 1
     })
     .send();
 
-  // 🔥 Step 2: Create listing
-  const newListing = new Listing(req.body.listing);
+  // 2. Update Basic Info
+  let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
 
-  // 🔥 Step 3: Save geometry from Mapbox
-  newListing.geometry = geoData.body.features[0].geometry;
-
-  // 🔥 Step 4: Handle image
-  if (req.file) {
-    newListing.image = {
-      url: req.file.path,
-      filename: req.file.filename
-    };
+  // 3. Update Geometry if location changed
+  if (geoData.body.features.length > 0) {
+    listing.geometry = geoData.body.features[0].geometry;
   }
 
-  // 🔥 Step 5: Save owner
-  newListing.owner = req.user._id;
-
-  await newListing.save();
-
-  req.flash("success", "New listing created!");
-  res.redirect("/listings");
-};
-
-
-
-// EDIT
-module.exports.renderEditForm = async (req, res) => {
-  const { id } = req.params;
-  const listing = await Listing.findById(id);
-
-  res.render("listings/edit.ejs", { listing });
-};
-
-// UPDATE
-module.exports.updateListing = async (req, res) => {
-  const { id } = req.params;
-
-  let listing = await Listing.findByIdAndUpdate(id, {
-    ...req.body.listing
-  });
-
-  // If user uploaded new image
+  // 4. Handle Image Upload
   if (req.file) {
-
-    // Delete old image from Cloudinary
     if (listing.image && listing.image.filename) {
       await cloudinary.uploader.destroy(listing.image.filename);
     }
-
-    // Save new image
-    listing.image = {
-      url: req.file.path,
-      filename: req.file.filename
-    };
-
-    await listing.save();
+    listing.image = { url: req.file.path, filename: req.file.filename };
   }
 
+  await listing.save();
   req.flash("success", "Listing updated successfully!");
   res.redirect(`/listings/${id}`);
 };
 
-
-
 // DELETE
 module.exports.deleteListing = async (req, res) => {
   const { id } = req.params;
-
   const listing = await Listing.findById(id);
 
-  // Delete image from Cloudinary
   if (listing.image && listing.image.filename) {
     await cloudinary.uploader.destroy(listing.image.filename);
   }
 
-  // Delete listing from MongoDB
   await Listing.findByIdAndDelete(id);
-
   req.flash("success", "Listing deleted successfully!");
   res.redirect("/listings");
 };
-

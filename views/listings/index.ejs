@@ -1,106 +1,134 @@
 <% layout("/layouts/boilerplate") %>
 
-<% if(allListings.length === 0) { %>
-<% if(isMyListings) { %>
+<style>
+  /* Container for the filter icons */
+  #filters {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    margin: 1.2rem 0;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 
+  /* Hides scrollbar for Chrome/Safari */
+  #filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter {
+    text-align: center;
+    margin-right: 1.2rem;
+    margin-left: 1.2rem;
+    opacity: 0.7;
+    transition: 0.15s ease-in-out;
+    cursor: pointer;
+    min-width: fit-content;
+    padding-bottom: 5px;
+  }
+
+  .filter:hover, .filter.active {
+    opacity: 1;
+    border-bottom: 2px solid #fe424d;
+  }
+
+  .filter i {
+    font-size: 1.1rem;
+  }
+
+  .filter p {
+    font-size: 0.75rem;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    #filters {
+      justify-content: flex-start;
+      padding: 0 1rem;
+    }
+  }
+</style>
+
+<div id="filters">
+    <% 
+       const categories = [
+         { name: "Trending", icon: "fa-fire" },
+         { name: "Rooms", icon: "fa-bed" },
+         { name: "Iconic Cities", icon: "fa-mountain-city" },
+         { name: "Mountains", icon: "fa-mountain" },
+         { name: "Castles", icon: "fa-fort-awesome" },
+         { name: "Amazing Pools", icon: "fa-person-swimming" },
+         { name: "Camping", icon: "fa-campground" },
+         { name: "Farms", icon: "fa-cow" },
+         { name: "Arctic", icon: "fa-snowflake" },
+         { name: "Domes", icon: "fa-igloo" },
+         { name: "Boats", icon: "fa-ship" }
+       ];
+    %>
+
+    <% for(let cat of categories) { %>
+      <div class="filter <%= (typeof category !== 'undefined' && category === cat.name) ? 'active' : '' %>" 
+           onclick="window.location.href='/listings?category=<%= cat.name %>'">
+          <div><i class="fa-solid <%= cat.icon %>"></i></div>
+          <p><%= cat.name %></p>
+      </div>
+    <% } %>
+</div>
+
+<% if(allListings.length === 0) { %>
     <div class="text-center mt-5">
       <i class="fa-solid fa-house-circle-exclamation fa-3x mb-3 text-muted"></i>
-      <h4>You haven't created any listings yet.</h4>
-      <p class="text-muted">
-        Start hosting your place and earn with Dwellio.
-      </p>
-
-      <a href="/listings/new" class="btn btn-dark mt-3">
-        Switch to Hosting
-      </a>
-    </div>
-
-  <% } else { %>
-
-    <div class="text-center mt-5">
       <h4>No listings found.</h4>
-      <p class="text-muted">
-        Try searching for a different location.
-      </p>
+      <p class="text-muted"><%= (typeof isMyListings !== 'undefined' && isMyListings) ? "Start hosting your place to see them here." : "Try searching for a different location or category." %></p>
+      <% if(typeof isMyListings !== 'undefined' && isMyListings) { %>
+        <a href="/listings/new" class="btn btn-dark mt-3">Switch to Hosting</a>
+      <% } %>
     </div>
-
-  <% } %>
-
 <% } else { %>
-<h3 class="mb-4 indexhead">All Listings</h3>
-  <div class="row g-4">
-    <% for (let listing of allListings) { %>
-      <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 out">
-  <div class="card listing-card position-relative">
+    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
+        <% for (let listing of allListings) { %>
+          <div class="col">
+            <div class="card listing-card">
+              <% if(typeof currentUser !== 'undefined' && currentUser) { %>
+                <div style="position:absolute; top:10px; right:10px; z-index:10;">
+                  <form action="/wishlist/<%= listing._id %><%= (currentUser.wishlist && currentUser.wishlist.some(id => id.toString() === listing._id.toString())) ? '?_method=DELETE' : '' %>" method="POST">
+                    <button type="submit" class="wishlist-btn" style="background:none; border:none;">
+                      <i class="fa-<%= (currentUser.wishlist && currentUser.wishlist.some(id => id.toString() === listing._id.toString())) ? 'solid text-danger' : 'regular' %> fa-heart"></i>
+                    </button>
+                  </form>
+                </div>
+              <% } %>
 
-    <% if(currentUser) { %>
-  <div style="position:absolute; top:10px; right:10px; z-index:1000;">
-    <% if(currentUser.wishlist && 
-          currentUser.wishlist.some(id => 
-            id.toString() === listing._id.toString()
-          )) { %>
-
-      <form action="/wishlist/<%= listing._id %>?_method=DELETE" method="POST">
-        <button type="submit"
-          style="background:white; border:none; border-radius:50%; padding:8px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-          <i class="fa-solid fa-heart text-danger"></i>
-        </button>
-      </form>
-
-    <% } else { %>
-
-      <form action="/wishlist/<%= listing._id %>" method="POST">
-        <button type="submit"
-          style="background:white; border:none; border-radius:50%; padding:8px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-          <i class="fa-regular fa-heart"></i>
-        </button>
-      </form>
-
-    <% } %>
-  </div>
-<% } %>
-    <!-- Clickable Image -->
-    <a href="/listings/<%= listing._id %>" class="listing-link">
-      <img 
-        src="<%= listing.image?.url || 'https://q-xx.bstatic.com/xdata/images/hotel/max500/672628389.jpg' %>" 
-        class="card-img-top listing-img" 
-        alt="listing image">
-    </a>
-
-    <!-- Card Body -->
-    <div class="card-body">
-      <a href="/listings/<%= listing._id %>" 
-         class="text-decoration-none text-dark">
-
-        <p class="card-text">
-          <%= listing.title %>
-        </p>
-
-        <p class="listing-price">
-          <span class="fw-bold">
-            ₹ <%= listing.price?.toLocaleString("en-IN") || "N/A" %>
-          </span> / night
-        </p>
-
-      </a>
+              <a href="/listings/<%= listing._id %>" class="listing-link">
+                <img src="<%= listing.image?.url %>" class="card-img-top listing-img" alt="listing image">
+                <div class="card-body">
+                  <p class="card-text"><b><%= listing.title %></b></p>
+                  <p class="listing-price">
+                    ₹ <%= listing.price?.toLocaleString("en-IN") %> / night
+                  </p>
+                  <p class="card-text text-muted" style="font-size: 0.85rem;">
+                    <%= listing.totalRooms - listing.bookedRooms %> out of <%= listing.totalRooms %> rooms available
+                  </p>
+                </div>
+              </a>
+            </div>
+          </div>
+        <% } %>
     </div>
-
-  </div>
-</div>
-    <% } %>
-  </div>
-
-  <!-- Map only shows if listings exist -->
-  <div id="map" style="width:100%; height:500px;" class="mt-5"></div>
-
-  <script>
-    const mapData = {
-      token: "<%= mapToken %>",
-      listings: <%- JSON.stringify(listingsGeoJSON) %>
-    };
-  </script>
-  <% script = `
-<script src="/js/indexMap.js"></script>
-` %>
-
 <% } %>
+
+<div id="map" style="width:100%; height:450px;" class="mt-5 rounded-4 shadow-sm"></div>
+
+<script>
+  const mapToken = "<%= mapToken %>";
+  const rawData = <%- JSON.stringify(listingsGeoJSON) %>;
+  
+  // Clean the data to prevent errors
+  const mapData = {
+      type: "FeatureCollection",
+      features: rawData.features.filter(f => f.geometry && f.geometry.coordinates)
+  };
+</script>
+<script src="/js/map.js"></script>

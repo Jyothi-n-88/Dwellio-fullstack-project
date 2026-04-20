@@ -1,6 +1,6 @@
 const Listing = require("../models/listing");
 const Review = require("../models/reviews");
-const { listingSchema, reviewSchema } = require("../schema.js");
+const { listingSchema, reviewSchema, reservationSchema } = require("../schema.js");
 const ExpressError=require("../utils/expressError.js");
 module.exports.isLoggedIn = (req, res, next) => {
     if (!req.isAuthenticated()) {
@@ -70,4 +70,14 @@ module.exports.validateReview = (req, res, next) => {
     throw new ExpressError(400, msg);
   }
   next();
+};
+
+module.exports.validateReservation = (req, res, next) => {
+    let { error } = reservationSchema.validate(req.body);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    } else {
+        next();
+    }
 };

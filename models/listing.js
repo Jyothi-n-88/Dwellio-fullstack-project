@@ -24,6 +24,17 @@ const listingSchema = new Schema({
     },
   },
   price: Number,
+  totalRooms: {
+    type: Number,
+    required: true,
+    min: 1,
+    default: 1
+  },
+  bookedRooms: {
+    type: Number,
+    default: 0
+  },
+  contact: { type: String, required: true },
   location: String,
   country: String,
   owner: {
@@ -37,19 +48,22 @@ const listingSchema = new Schema({
     }
   ],
   geometry: {
-  type: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      required: true
+    },
+    coordinates: {
+      type: [Number],
+      required: true
+    }
+  },
+  category: {
     type: String,
-    enum: ['Point'],
+    enum: ["Trending", "Rooms", "Iconic Cities", "Mountains", "Castles", "Amazing Pools", "Camping", "Farms", "Arctic", "Domes", "Boats"],
     required: true
   },
-  coordinates: {
-    type: [Number],
-    required: true
-  }
-},
-
 });
-
 
 // ✅ CASCADE DELETE 
 listingSchema.post("findOneAndDelete", async function (listing) {

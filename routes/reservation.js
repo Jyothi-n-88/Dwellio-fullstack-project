@@ -1,67 +1,61 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const Reservation = require("../models/reservation");
 const Listing = require("../models/listing");
-const { isLoggedIn } = require("./middleware");
+const wrapAsync = require("../utils/wrapAsync");
+// Verify this path is correct based on your folder structure
+const { isLoggedIn, validateReservation } = require("./middleware"); 
 
-router.post("/:id", isLoggedIn, async (req, res) => {
-  const { id } = req.params;
-  const { checkIn, checkOut } = req.body;
+// CREATE RESERVATION
+router.post("/", 
+    isLoggedIn, 
+    validateReservation, 
+    wrapAsync(async (req, res) => {
+        const { id } = req.params;
+        const { checkIn, checkOut, roomsToBook } = req.body;
+        const roomsRequested = parseInt(roomsToBook);
 
-  const existingReservations = await Reservation.find({
-    listing: id,
-    $or: [
-      {
-        checkIn: { $lt: new Date(checkOut) },
-        checkOut: { $gt: new Date(checkIn) }
-      }
-    ]
-  });
+        const userIn = new Date(checkIn);
+        const userOut = new Date(checkOut);
 
-  if (existingReservations.length > 0) {
-    req.flash("error", "This date is already booked!");
-    return res.redirect(`/listings/${id}`);
-  }
+        const listing = await Listing.findById(id);
 
-  const listing = await Listing.findById(id);
+        const overlappingReservations = await Reservation.find({
+            listing: id,
+            $or: [
+                { checkIn: { $lt: userOut }, checkOut: { $gt: userIn } }
+            ]
+        });
 
-  const totalDays =
-    (new Date(checkOut) - new Date(checkIn)) /
-    (1000 * 60 * 60 * 24);
+        const roomsTaken = overlappingReservations.reduce((acc, curr) => acc + curr.roomsBooked, 0);
+        const roomsAvailable = listing.totalRooms - roomsTaken;
 
-  const reservation = new Reservation({
-    listing: id,
-    guest: req.user._id,
-    checkIn,
-    checkOut,
-    totalPrice: totalDays * listing.price
-  });
+        if (roomsRequested > roomsAvailable) {
+            req.flash("error", `Only ${roomsAvailable} rooms available for these dates.`);
+            return res.redirect(`/listings/${id}`);
+        }
 
-  await reservation.save();
+        const nights = Math.ceil((userOut - userIn) / (1000 * 60 * 60 * 24));
+        const reservation = new Reservation({
+            listing: id,
+            guest: req.user._id,
+            checkIn: userIn,
+            checkOut: userOut,
+            roomsBooked: roomsRequested,
+            totalPrice: nights * listing.price * roomsRequested
+        });
 
-  req.flash("success", "Reservation successful!");
-  res.redirect("/profile");
-});
+        await reservation.save();
+        req.flash("success", "Reservation confirmed!");
+        res.redirect("/profile");
+    })
+);
 
-// CANCEL RESERVATION
-router.delete("/:reservationId", isLoggedIn, async (req, res) => {
-  const { reservationId } = req.params;
+// DELETE RESERVATION
+router.delete("/:id", isLoggedIn, wrapAsync(async (req, res) => {
+    await Reservation.findByIdAndDelete(req.params.id);
+    req.flash("success", "Reservation cancelled!");
+    res.redirect("/profile");
+}));
 
-  const reservation = await Reservation.findById(reservationId);
-
-  if (!reservation) {
-    req.flash("error", "Reservation not found.");
-    return res.redirect("/profile");
-  }
-
-  if (!reservation.guest.equals(req.user._id)) {
-    req.flash("error", "Not authorized.");
-    return res.redirect("/profile");
-  }
-
-  await Reservation.findByIdAndDelete(reservationId);
-
-  req.flash("success", "Reservation cancelled successfully.");
-  res.redirect("/profile");
-});
 module.exports = router;
