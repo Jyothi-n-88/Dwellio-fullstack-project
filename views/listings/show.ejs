@@ -62,29 +62,32 @@
         </p>
 
         <form action="/reservations/<%= listing._id %>" method="POST" class="needs-validation" novalidate>
-          <div class="booking-box mb-3">
-            <div class="row g-0 border-bottom">
-              <div class="col-6 border-end p-2">
-                <label class="small fw-bold">CHECK-IN</label>
-                <input type="date" id="checkIn" name="checkIn" class="form-control border-0 p-0" required>
-              </div>
-              <div class="col-6 p-2">
-                <label class="small fw-bold">CHECKOUT</label>
-                <input type="date" id="checkOut" name="checkOut" class="form-control border-0 p-0" required>
-              </div>
-            </div>
-            <div class="row g-0">
-              <div class="col-12 p-2">
-                <label class="small fw-bold">ROOMS TO BOOK</label>
-                <input type="number" id="roomsToBook" name="roomsToBook" class="form-control border-0 p-0" value="1" min="1" max="<%= listing.totalRooms %>" required>
-              </div>
-            </div>
-          </div>
+  <div class="booking-box mb-3">
+    <div class="row g-0 border-bottom">
+      <div class="col-6 border-end p-2">
+        <label class="small fw-bold">CHECK-IN</label>
+        <input type="date" id="checkIn" name="checkIn" class="form-control border-0 p-0" required>
+      </div>
+      <div class="col-6 p-2">
+        <label class="small fw-bold">CHECKOUT</label>
+        <input type="date" id="checkOut" name="checkOut" class="form-control border-0 p-0" required>
+      </div>
+    </div>
+    <div class="row g-0">
+      <div class="col-12 p-2">
+        <label class="small fw-bold">ROOMS TO BOOK</label>
+        <input type="number" id="roomsToBook" name="roomsToBook" class="form-control border-0 p-0" value="1" min="1" max="<%= listing.totalRooms %>" required>
+        
+        <div id="availability-status" class="mt-2 fw-bold text-success small" style="display: none;"></div>
+      
+      </div>
+    </div>
+  </div>
 
-          <button class="btn reserve-btn w-100 py-2 rounded-pill">
-            Reserve
-          </button>
-        </form>
+  <button class="btn reserve-btn w-100 py-2 rounded-pill">
+    Reserve
+  </button>
+</form>
 
         <p class="text-muted text-center small mt-3">
           Free cancellation before <strong id="cancel-date-display">...</strong>
@@ -193,6 +196,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const checkout = document.getElementById("checkOut");
   const roomsInput = document.getElementById("roomsToBook");
   const cancelText = document.getElementById("cancel-date-display");
+  const reserveBtn = document.querySelector(".reserve-btn");
+  const statusDiv = document.getElementById("availability-status");
 
   const totalDiv = document.createElement("div");
   totalDiv.style.marginBottom = "15px";
@@ -210,6 +215,7 @@ document.addEventListener("DOMContentLoaded", function () {
     checkout.setAttribute("min", today);
   }
 
+  // CALCULATION LOGIC
   function updateCalculation() {
     if (checkin && checkout && checkin.value && checkout.value) {
       const start = new Date(checkin.value);
@@ -229,6 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // CANCELLATION DATE LOGIC
   function updateCancellation() {
     if (checkin && checkin.value) {
       const cancelDate = new Date(checkin.value);
@@ -244,16 +251,64 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+// Inside script tag in show.ejs
+
+async function fetchAvailability() {
+  if (checkin && checkout && checkin.value && checkout.value) {
+    try {
+      const response = await fetch(`/reservations/<%= listing._id %>/check-availability?checkIn=${checkin.value}&checkOut=${checkout.value}`);
+      const data = await response.json();
+
+      if (data.available !== undefined) {
+        statusDiv.style.display = "block";
+        
+        if (data.available > 0) {
+          // RESTORE BUTTON STATE
+          statusDiv.innerText = `✓ ${data.available} out of ${data.total} rooms available`;
+          statusDiv.className = "mt-2 fw-bold text-success small";
+          reserveBtn.disabled = false; 
+          reserveBtn.innerText = "Reserve"; // Reset text
+          reserveBtn.style.opacity = "1";
+          reserveBtn.style.cursor = "pointer";
+          
+          roomsInput.setAttribute("max", data.available);
+          if (parseInt(roomsInput.value) > data.available) {
+              roomsInput.value = data.available;
+              updateCalculation();
+          }
+        } else {
+          // SOLD OUT STATE
+          statusDiv.innerText = "❌ No rooms available for these dates.";
+          statusDiv.className = "mt-2 fw-bold text-danger small";
+          reserveBtn.disabled = true; 
+          reserveBtn.innerText = "Sold Out";
+          reserveBtn.style.opacity = "0.6";
+          reserveBtn.style.cursor = "not-allowed"; 
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching availability:", err);
+    }
+  } else {
+      statusDiv.style.display = "none";
+  }
+}
+
+  // EVENT LISTENERS
   if(checkin) {
       checkin.addEventListener("change", function () {
         checkout.setAttribute("min", checkin.value);
         updateCalculation();
         updateCancellation();
+        fetchAvailability();
       });
   }
 
   if(checkout) {
-      checkout.addEventListener("change", updateCalculation);
+      checkout.addEventListener("change", function() {
+          updateCalculation();
+          fetchAvailability();
+      });
   }
 
   if(roomsInput) {

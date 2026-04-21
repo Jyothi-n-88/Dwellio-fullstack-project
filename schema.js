@@ -8,7 +8,10 @@ module.exports.listingSchema = Joi.object({
     country: Joi.string().required(),
     price: Joi.number().required().min(0),
     totalRooms: Joi.number().required().min(1),
-    contact: Joi.string().required().pattern(/^[0-9+\s-]{10,15}$/), // Allows numbers, +, and spaces
+    contact: Joi.string()
+    .length(10) // Force exactly 10 digits
+    .pattern(/^[0-9]+$/) // Only numbers
+    .required(),
     category: Joi.string()
       .valid("Trending", "Rooms", "Iconic Cities", "Mountains", "Castles", "Amazing Pools", "Camping", "Farms", "Arctic", "Domes", "Boats")
       .required(),

@@ -104,49 +104,39 @@ module.exports.renderEditForm = async (req, res) => {
   res.render("listings/edit.ejs", { listing });
 };
 
-// UPDATE
 module.exports.updateListing = async (req, res) => {
   const { id } = req.params;
-  const { totalRooms, location, country } = req.body.listing;
 
-  // Check current status before update
-  const currentListing = await Listing.findById(id);
-  if (!currentListing) {
+  // 1. Fetch the document first
+  let listing = await Listing.findById(id);
+  if (!listing) {
     req.flash("error", "Listing not found!");
     return res.redirect("/listings");
   }
 
-  // Safety: Don't allow totalRooms to be less than current bookings
-  if (totalRooms < currentListing.bookedRooms) {
-    req.flash("error", `Cannot set total rooms to ${totalRooms}. ${currentListing.bookedRooms} rooms are already booked.`);
-    return res.redirect(`/listings/${id}/edit`);
-  }
-
-  // 1. Re-geocode for new coordinates
+  // 2. Add Geocoding logic (if location/country changed)
   const geoData = await geocoder
     .forwardGeocode({
-      query: `${location}, ${country}`,
+      query: `${req.body.listing.location}, ${req.body.listing.country}`,
       limit: 1
     })
     .send();
-
-  // 2. Update Basic Info
-  let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-
-  // 3. Update Geometry if location changed
   if (geoData.body.features.length > 0) {
     listing.geometry = geoData.body.features[0].geometry;
   }
 
-  // 4. Handle Image Upload
+  // 3. Handle Image Upload
   if (req.file) {
-    if (listing.image && listing.image.filename) {
-      await cloudinary.uploader.destroy(listing.image.filename);
-    }
     listing.image = { url: req.file.path, filename: req.file.filename };
   }
 
+  // 4. THE FIX: Merge all form data (including contact) into the object
+  // This ensures 'contact' is present when .save() is called
+  listing.set(req.body.listing);
+
+  // 5. Final Save
   await listing.save();
+
   req.flash("success", "Listing updated successfully!");
   res.redirect(`/listings/${id}`);
 };
