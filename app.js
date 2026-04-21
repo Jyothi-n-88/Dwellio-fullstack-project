@@ -86,6 +86,9 @@ app.use(async (req, res, next) => {
 
   next();
 });
+app.get("/", (req, res) => {
+    res.redirect("/listings");
+});
 app.use("/listings",listingrouter);
 app.use("/listings/:id/reviews",reviewrouter);
 app.use(signuprouter);
