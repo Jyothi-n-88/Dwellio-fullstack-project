@@ -9,9 +9,8 @@
                     Login to Dwellio
                 </h3>
 
-                <form action="/login" method="POST" class="needs-validation" novalidate>
+                <form action="/login" method="POST" class="needs-validation" novalidate autocomplete="off">
 
-                    <!-- Username -->
                     <div class="mb-3">
                         <label class="form-label">Username</label>
                         <input
@@ -20,13 +19,13 @@
                             class="form-control"
                             placeholder="Enter username"
                             required
+                            autocomplete="off"
                         />
                         <div class="invalid-feedback">
                             Username is required.
                         </div>
                     </div>
 
-                    <!-- Password -->
                     <div class="mb-3">
                         <label class="form-label">Password</label>
                         <input
@@ -35,6 +34,7 @@
                             class="form-control"
                             placeholder="Enter password"
                             required
+                            autocomplete="new-password"
                         />
                         <div class="invalid-feedback">
                             Password is required.
